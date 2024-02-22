@@ -49,12 +49,11 @@ const WorldMap = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-
     let redius = 100;
     let circles = [];
-    for (let i = 0; i < 50; i++) {
-      let x = Math.random() * ctx.canvas.width;
-      let y = Math.random() * ctx.canvas.height;
+    for (let i = 0; i <50; i++) {
+      let x = Math.random() *( ctx.canvas.width-redius*2)+redius;
+      let y = Math.random() * (ctx.canvas.height-redius*2)+redius;
       // console.log(x, y);
       let dx = (Math.random() - 0.5) * 8;
       let dy = (Math.random() - 0.5) * 8;
