@@ -1,6 +1,17 @@
 import React, { useEffect, useRef } from "react";
 const WorldMap = () => {
+  let colorArray = [
+    "green",
+    "red",
+    "yellow",
+    "black",
+    "blue",
+    "orange",
+    "skyblue",
+    "lightblue",
+  ];
   const canvasRef = useRef(null);
+  const mouse = { x: undefined, y: undefined };
   const drawRect = (ctx, count) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.filStyle = "green";
@@ -20,46 +31,77 @@ const WorldMap = () => {
   };
   function Circle(x, y, ctx, dx, dy, raduis) {
     // console.log(x);
+
     this.y = y;
     this.x = x;
     this.dx = dx;
     this.dy = dy;
     this.ctx = ctx;
     this.raduis = raduis;
+    this.minRaduis = raduis;
+    this.color = colorArray[Math.floor(Math.random() * colorArray.length)];
+    // console.log("x=>", this.x, "y=>", this.y);
     this.draw = function () {
       // console.log(x, y);
-     
-      ctx.beginPath();
-      ctx.lineWidth = 5;
-      ctx.arc(this.x, this.y, this.raduis, 0, Math.PI * 2, false);
-      ctx.strokeStyle = "red";
-      ctx.stroke();
+      this.ctx.fillStyle = this.color;
+      this.ctx.beginPath();
+      this.ctx.lineWidth = 5;
+      this.ctx.arc(this.x, this.y, this.raduis, 0, Math.PI * 2, false);
+
+      ctx.fill();
     };
     this.update = function () {
-      if (this.x + this.raduis >= this.ctx.canvas.width || this.x - 100 < 0) {
+      if (
+        this.x + this.raduis >= this.ctx.canvas.width ||
+        this.x - this.raduis < 0
+      ) {
         this.dx = -this.dx;
       }
-      if (this.y + this.raduis >= this.ctx.canvas.height || this.y - 100 < 0) {
+      if (
+        this.y + this.raduis >= this.ctx.canvas.height ||
+        this.y - this.raduis < 0
+      ) {
         this.dy = -this.dy;
       }
       this.x += this.dx;
       this.y += this.dy;
+      //intrectivity
+      if (
+        mouse.x - this.x < 100 &&
+        mouse.x - this.x > -100 &&
+        mouse.y - this.y < 100 &&
+        mouse.y - this.y > -100
+      ) {
+        if (this.raduis < 100) this.raduis += 1;
+      } else if (this.raduis > this.minRaduis) {
+        this.raduis = this.raduis - 1;
+      }
     };
   }
+  window.addEventListener("mousemove", (event) => {
+    mouse.x = event.x;
+    mouse.y = event.y;
+  });
+  // for giving size to canvas dynamicaly
+  window.addEventListener("resize", (event) => {
+    canvasRef.current.width = window.innerWidth;
+    canvasRef.current.height = window.innerHeight;
+  });
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    let redius = 100;
+
     let circles = [];
-    for (let i = 0; i <50; i++) {
-      let x = Math.random() *( ctx.canvas.width-redius*2)+redius;
-      let y = Math.random() * (ctx.canvas.height-redius*2)+redius;
+    for (let i = 0; i < 800; i++) {
+      let redius = Math.random() * 3 + 5;
+      let x = Math.random() * (ctx.canvas.width - redius * 2) + redius;
+      let y = Math.random() * (ctx.canvas.height - redius * 2) + redius;
       // console.log(x, y);
       let dx = (Math.random() - 0.5) * 8;
       let dy = (Math.random() - 0.5) * 8;
       circles.push(new Circle(x, y, ctx, dx, dy, redius));
     }
-    console.log(circles);
+    // console.log(circles);
     // let x = Math.random() * ctx.canvas.width;
     // let y = Math.random() * ctx.canvas.height;
     //  console.log(x, y);
@@ -76,7 +118,6 @@ const WorldMap = () => {
       // circle.update();
       animationId = requestAnimationFrame(render);
       for (let i = 0; i < circles.length; i++) {
-        console.log(i);
         circles[i].draw();
         circles[i].update();
       }
@@ -85,12 +126,13 @@ const WorldMap = () => {
     return () => window.cancelAnimationFrame(animationId);
   }, []);
   return (
-    <canvas
-      ref={canvasRef}
-      width={2000}
-      height={1500}
-      style={{ border: "1px solid black" }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        width={window.innerWidth}
+        height={window.innerHeight}
+      />
+    </>
   );
 };
 
